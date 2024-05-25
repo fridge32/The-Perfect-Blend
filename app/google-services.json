@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "972759939054",
+    "project_id": "the-perfect-blend-b4608",
+    "storage_bucket": "the-perfect-blend-b4608.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972759939054:android:f83d7ecedfa6190b7100ff",
+        "android_client_info": {
+          "package_name": "com.example.the_perfect_blend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBh0GeuUd9CnrsQjmGshn6F55Ey7mAjWcY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
