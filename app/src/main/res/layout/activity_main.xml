@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="16dp">
+
+    <TextView
+            android:id="@+id/targetColorView"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:text="Target Color"
+            android:gravity="center"
+            android:textSize="18sp" />
+
+    <SeekBar
+            android:id="@+id/seekBarRed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="255" />
+
+    <SeekBar
+            android:id="@+id/seekBarGreen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="255" />
+
+    <SeekBar
+            android:id="@+id/seekBarBlue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="255" />
+
+    <Button
+            android:id="@+id/mixButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mix Colors"
+            android:layout_marginTop="16dp" />
+
+    <!-- Add other views as needed -->
+
+</LinearLayout>
