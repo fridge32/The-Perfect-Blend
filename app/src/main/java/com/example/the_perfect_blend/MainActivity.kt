@@ -33,7 +33,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mixedColorView: TextView
     private lateinit var percentageView: TextView
     private lateinit var paletteButtons: Map<String, Pair<Button, Button>>
+    private lateinit var resetButton: Button
+    private lateinit var previousButton: Button
+    private lateinit var nextButton: Button
 
+    private var targetColors: MutableList<String> = mutableListOf()
+    private var targetColorIndex: Int = 0
+    private var savedColors: MutableList<String> = mutableListOf()
     private var targetColor: String = ""
     private var mixedColor: String = ""
     private var paletteWeights: MutableMap<String, Double> = mutableMapOf(
@@ -55,6 +61,9 @@ class MainActivity : AppCompatActivity() {
         targetColorView = findViewById(R.id.targetColorView)
         mixedColorView = findViewById(R.id.mixedColorView)
         percentageView = findViewById(R.id.percentageView)
+        resetButton = findViewById(R.id.resetButton)
+        previousButton = findViewById(R.id.previousButton)
+        nextButton = findViewById(R.id.nextButton)
 
         // Initialize color buttons
         paletteButtons = mapOf(
@@ -68,13 +77,20 @@ class MainActivity : AppCompatActivity() {
             "#FFFF00" to Pair(findViewById(R.id.buttonYellowIncrement), findViewById(R.id.buttonYellowDecrement))
         )
 
-        targetColor = generateRandomColor()
-        targetColorView.setBackgroundColor(Color.parseColor(targetColor))
-
+        // Set button listeners
         paletteButtons.forEach { (color, buttons) ->
             buttons.first.setOnClickListener { changePaletteWeight(color, 0.1) }
             buttons.second.setOnClickListener { changePaletteWeight(color, -0.1) }
         }
+
+        resetButton.setOnClickListener { resetPaletteWeights() }
+        previousButton.setOnClickListener { navigateToPreviousColor() }
+        nextButton.setOnClickListener { navigateToNextColor() }
+
+        // Initialize target colors
+        repeat(10) { targetColors.add(generateRandomColor()) }
+        targetColor = targetColors[targetColorIndex]
+        targetColorView.setBackgroundColor(Color.parseColor(targetColor))
 
         updateMixedColorAndPercentage()
     }
@@ -185,5 +201,43 @@ class MainActivity : AppCompatActivity() {
         mixedColorView.setBackgroundColor(Color.parseColor(mixedColor))
         val matchPercentage = calculatePercentage(targetColor, mixedColor)
         percentageView.text = "Match Percentage: $matchPercentage%"
+
+        //To add >95% logic here -> pop up?
+    }
+
+    private fun saveMatchedColor(color: String) {
+        savedColors.add(color)
+    }
+
+    private fun resetPaletteWeights() {
+        paletteWeights = mutableMapOf(
+            "#FFFFFF" to 0.0,
+            "#000000" to 0.0,
+            "#FF0000" to 0.0,
+            "#00FF00" to 0.0,
+            "#0000FF" to 0.0,
+            "#00FFFF" to 0.0,
+            "#FF00FF" to 0.0,
+            "#FFFF00" to 0.0
+        )
+        updateMixedColorAndPercentage()
+    }
+
+    private fun navigateToPreviousColor() {
+        if (targetColorIndex > 0) {
+            targetColorIndex--
+            targetColor = targetColors[targetColorIndex]
+            targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+            resetPaletteWeights()
+        }
+    }
+
+    private fun navigateToNextColor() {
+        if (targetColorIndex < targetColors.size - 1) {
+            targetColorIndex++
+            targetColor = targetColors[targetColorIndex]
+            targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+            resetPaletteWeights()
+        }
     }
 }
