@@ -29,13 +29,10 @@ data class LabColor(val l: Double, val a: Double, val b: Double)
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var database: FirebaseDatabase
-    private lateinit var firestore: FirebaseFirestore
     private lateinit var targetColorView: TextView
-    private lateinit var mixButton: Button
-    private lateinit var seekBarRed: SeekBar
-    private lateinit var seekBarGreen: SeekBar
-    private lateinit var seekBarBlue: SeekBar
+    private lateinit var mixedColorView: TextView
+    private lateinit var percentageView: TextView
+    private lateinit var paletteButtons: Map<String, Pair<Button, Button>>
 
     private var targetColor: String = ""
     private var mixedColor: String = ""
@@ -54,25 +51,32 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize Firebase
-        database = FirebaseDatabase.getInstance()
-        firestore = FirebaseFirestore.getInstance()
-
         // Initialize UI elements
         targetColorView = findViewById(R.id.targetColorView)
-        mixButton = findViewById(R.id.mixButton)
-        seekBarRed = findViewById(R.id.seekBarRed)
-        seekBarGreen = findViewById(R.id.seekBarGreen)
-        seekBarBlue = findViewById(R.id.seekBarBlue)
+        mixedColorView = findViewById(R.id.mixedColorView)
+        percentageView = findViewById(R.id.percentageView)
+
+        // Initialize color buttons
+        paletteButtons = mapOf(
+            "#FFFFFF" to Pair(findViewById(R.id.buttonWhiteIncrement), findViewById(R.id.buttonWhiteDecrement)),
+            "#000000" to Pair(findViewById(R.id.buttonBlackIncrement), findViewById(R.id.buttonBlackDecrement)),
+            "#FF0000" to Pair(findViewById(R.id.buttonRedIncrement), findViewById(R.id.buttonRedDecrement)),
+            "#00FF00" to Pair(findViewById(R.id.buttonGreenIncrement), findViewById(R.id.buttonGreenDecrement)),
+            "#0000FF" to Pair(findViewById(R.id.buttonBlueIncrement), findViewById(R.id.buttonBlueDecrement)),
+            "#00FFFF" to Pair(findViewById(R.id.buttonCyanIncrement), findViewById(R.id.buttonCyanDecrement)),
+            "#FF00FF" to Pair(findViewById(R.id.buttonMagentaIncrement), findViewById(R.id.buttonMagentaDecrement)),
+            "#FFFF00" to Pair(findViewById(R.id.buttonYellowIncrement), findViewById(R.id.buttonYellowDecrement))
+        )
 
         targetColor = generateRandomColor()
         targetColorView.setBackgroundColor(Color.parseColor(targetColor))
 
-        mixButton.setOnClickListener {
-            mixedColor = produceMixture(paletteWeights)
-            val matchPercentage = calculatePercentage(targetColor, mixedColor)
-            // Handle the result (e.g., display it to the players, update the database, etc.)
+        paletteButtons.forEach { (color, buttons) ->
+            buttons.first.setOnClickListener { changePaletteWeight(color, 0.1) }
+            buttons.second.setOnClickListener { changePaletteWeight(color, -0.1) }
         }
+
+        updateMixedColorAndPercentage()
     }
 
     private fun generateRandomColor(): String {
@@ -90,6 +94,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun rgbToHex(r: Int, g: Int, b: Int): String {
         return String.format("#%02x%02x%02x", r, g, b)
+    }
+
+    private fun changePaletteWeight(color: String, amount: Double) {
+        paletteWeights[color] = (paletteWeights[color] ?: 0.0) + amount
+        if (paletteWeights[color]!! < 0) paletteWeights[color] = 0.0
+        updateMixedColorAndPercentage()
     }
 
     private fun produceMixture(paletteWeights: Map<String, Double>): String {
@@ -168,5 +178,12 @@ class MainActivity : AppCompatActivity() {
 
         val difference = deltaE(labColor1, labColor2)
         return round(100 * exp(-difference / 10) * 10) / 10.0
+    }
+
+    private fun updateMixedColorAndPercentage() {
+        mixedColor = produceMixture(paletteWeights)
+        mixedColorView.setBackgroundColor(Color.parseColor(mixedColor))
+        val matchPercentage = calculatePercentage(targetColor, mixedColor)
+        percentageView.text = "Match Percentage: $matchPercentage%"
     }
 }

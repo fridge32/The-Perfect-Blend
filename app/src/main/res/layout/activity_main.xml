@@ -13,31 +13,199 @@
             android:gravity="center"
             android:textSize="18sp" />
 
-    <SeekBar
-            android:id="@+id/seekBarRed"
+    <TextView
+            android:id="@+id/mixedColorView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="255" />
-
-    <SeekBar
-            android:id="@+id/seekBarGreen"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="255" />
-
-    <SeekBar
-            android:id="@+id/seekBarBlue"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="255" />
-
-    <Button
-            android:id="@+id/mixButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mix Colors"
+            android:layout_height="100dp"
+            android:text="Mixed Color"
+            android:gravity="center"
+            android:textSize="18sp"
             android:layout_marginTop="16dp" />
 
-    <!-- Add other views as needed -->
+    <TextView
+            android:id="@+id/percentageView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Match Percentage: 0%"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:layout_marginTop="16dp" />
+
+    <!-- Color Buttons -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp">
+
+        <!-- White Color Buttons -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/buttonWhiteIncrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="White +" />
+
+            <Button
+                    android:id="@+id/buttonWhiteDecrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="White -" />
+        </LinearLayout>
+
+        <!-- Black Color Buttons -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/buttonBlackIncrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Black +" />
+
+            <Button
+                    android:id="@+id/buttonBlackDecrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Black -" />
+        </LinearLayout>
+
+        <!-- Red Color Buttons -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/buttonRedIncrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Red +" />
+
+            <Button
+                    android:id="@+id/buttonRedDecrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Red -" />
+        </LinearLayout>
+
+        <!-- Green Color Buttons -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/buttonGreenIncrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Green +" />
+
+            <Button
+                    android:id="@+id/buttonGreenDecrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Green -" />
+        </LinearLayout>
+
+        <!-- Blue Color Buttons -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/buttonBlueIncrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Blue +" />
+
+            <Button
+                    android:id="@+id/buttonBlueDecrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Blue -" />
+        </LinearLayout>
+
+        <!-- Cyan Color Buttons -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/buttonCyanIncrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cyan +" />
+
+            <Button
+                    android:id="@+id/buttonCyanDecrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cyan -" />
+        </LinearLayout>
+
+        <!-- Magenta Color Buttons -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/buttonMagentaIncrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Magenta +" />
+
+            <Button
+                    android:id="@+id/buttonMagentaDecrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Magenta -" />
+        </LinearLayout>
+
+        <!-- Yellow Color Buttons -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/buttonYellowIncrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Yellow +" />
+
+            <Button
+                    android:id="@+id/buttonYellowDecrement"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Yellow -" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>
