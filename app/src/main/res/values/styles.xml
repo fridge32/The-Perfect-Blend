@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme extending from Theme.AppCompat -->
-    <style name="Theme.ThePerfectBlend" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.ThePerfectBlend" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>

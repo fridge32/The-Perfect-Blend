@@ -3,12 +3,12 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:padding="16dp">
+              android:padding="8dp">
 
     <TextView
             android:id="@+id/targetColorView"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="60dp"
             android:text="Target Color"
             android:gravity="center"
             android:textSize="18sp" />
@@ -16,11 +16,11 @@
     <TextView
             android:id="@+id/mixedColorView"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="60dp"
             android:text="Mixed Color"
             android:gravity="center"
             android:textSize="18sp"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="10dp" />
 
     <TextView
             android:id="@+id/percentageView"
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="4dp">
+                android:padding="2dp">
             <Button
                     android:id="@+id/buttonWhiteDecrement"
                     android:layout_width="wrap_content"
@@ -69,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="4dp">
+                android:padding="2dp">
             <Button
                     android:id="@+id/buttonBlackDecrement"
                     android:layout_width="wrap_content"
@@ -94,7 +94,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="4dp">
+                android:padding="2dp">
             <Button
                     android:id="@+id/buttonRedDecrement"
                     android:layout_width="wrap_content"
@@ -119,7 +119,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="4dp">
+                android:padding="2dp">
             <Button
                     android:id="@+id/buttonGreenDecrement"
                     android:layout_width="wrap_content"
@@ -144,7 +144,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="4dp">
+                android:padding="2dp">
             <Button
                     android:id="@+id/buttonBlueDecrement"
                     android:layout_width="wrap_content"
@@ -169,7 +169,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="4dp">
+                android:padding="2dp">
             <Button
                     android:id="@+id/buttonCyanDecrement"
                     android:layout_width="wrap_content"
@@ -194,7 +194,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="4dp">
+                android:padding="2dp">
             <Button
                     android:id="@+id/buttonMagentaDecrement"
                     android:layout_width="wrap_content"
@@ -219,7 +219,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="4dp">
+                android:padding="2dp">
             <Button
                     android:id="@+id/buttonYellowDecrement"
                     android:layout_width="wrap_content"
@@ -244,9 +244,9 @@
     <Button
             android:id="@+id/resetButton"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:text="Reset"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="8dp"/>
 
     <!-- Forward and Backward Buttons -->
     <LinearLayout
@@ -260,13 +260,13 @@
                 android:id="@+id/previousButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=" Previous" />
+                android:text="Previous" />
 
         <Button
                 android:id="@+id/nextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Next "
+                android:text="Next"
                 android:layout_marginLeft="16dp"/>
     </LinearLayout>
 
