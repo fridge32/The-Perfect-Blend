@@ -15,6 +15,11 @@ import com.example.the_perfect_blend.ui.theme.ThePerfectBlendTheme
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 
+import com.example.the_perfect_blend.R
+import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
+import com.example.the_perfect_blend.data.database.ColorEntity
+import com.example.the_perfect_blend.data.database.AppDatabase
 import android.graphics.Color
 import android.widget.Button
 import android.widget.SeekBar
@@ -24,11 +29,15 @@ import kotlin.random.Random
 import kotlin.math.exp
 import kotlin.math.pow
 import kotlin.math.round
+import kotlinx.coroutines.launch
+
 
 data class LabColor(val l: Double, val a: Double, val b: Double)
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var db: AppDatabase
     private lateinit var targetColorView: TextView
     private lateinit var mixedColorView: TextView
     private lateinit var percentageView: TextView
@@ -37,7 +46,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var previousButton: Button
     private lateinit var nextButton: Button
 
-    private var targetColors: MutableList<String> = mutableListOf()
+    private var targetColors: MutableList<ColorEntity> = mutableListOf()
     private var targetColorIndex: Int = 0
     private var savedColors: MutableList<String> = mutableListOf()
     private var targetColor: String = ""
@@ -56,6 +65,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Initialize Firestore
+        firestore = FirebaseFirestore.getInstance()
+
+        // Initialize Room database
+        db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "color-database"
+        ).build()
 
         // Initialize UI elements
         targetColorView = findViewById(R.id.targetColorView)
@@ -87,17 +105,42 @@ class MainActivity : AppCompatActivity() {
         previousButton.setOnClickListener { navigateToPreviousColor() }
         nextButton.setOnClickListener { navigateToNextColor() }
 
-        // Initialize target colors
-        repeat(10) { targetColors.add(generateRandomColor()) }
-        targetColor = targetColors[targetColorIndex]
-        targetColorView.setBackgroundColor(Color.parseColor(targetColor))
-
-        updateMixedColorAndPercentage()
+        // Fetch and cache colors
+        fetchAndCacheColors {
+            lifecycleScope.launch {
+                targetColors = db.colorDao().getAllColors().toMutableList()
+                setNewTargetColor()
+            }
+        }
     }
 
-    private fun generateRandomColor(): String {
-        val random = Random
-        return rgbToHex(random.nextInt(256), random.nextInt(256), random.nextInt(256))
+    private fun fetchAndCacheColors(onComplete: () -> Unit) {
+        firestore.collection("colors").get()
+            .addOnSuccessListener { documents ->
+                val colorList = documents.map { document ->
+                    ColorEntity(
+                        hex = document.getString("hex") ?: "",
+                        name = document.getString("name") ?: ""
+                    )
+                }
+                lifecycleScope.launch {
+                    db.colorDao().insertAll(colorList)
+                    onComplete()
+                }
+            }
+            .addOnFailureListener { exception ->
+                // Handle error
+            }
+    }
+
+    private suspend fun setNewTargetColor() {
+        if (targetColors.isNotEmpty()) {
+            val randomColor = targetColors.random()
+            targetColor = randomColor.hex
+            targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+            targetColorView.text = "Target Color: ${randomColor.name}"
+            updateMixedColorAndPercentage()
+        }
     }
 
     private fun hexToRgb(hex: String): Triple<Int, Int, Int> {
@@ -176,10 +219,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun deltaE(lab1: LabColor, lab2: LabColor): Double {
-        return Math.sqrt(
-            Math.pow(lab1.l - lab2.l, 2.0) +
-                    Math.pow(lab1.a - lab2.a, 2.0) +
-                    Math.pow(lab1.b - lab2.b, 2.0)
+        return kotlin.math.sqrt(
+            (lab1.l - lab2.l).pow(2.0) +
+                    (lab1.a - lab2.a).pow(2.0) +
+                    (lab1.b - lab2.b).pow(2.0)
         )
     }
 
@@ -202,7 +245,10 @@ class MainActivity : AppCompatActivity() {
         val matchPercentage = calculatePercentage(targetColor, mixedColor)
         percentageView.text = "Match Percentage: $matchPercentage%"
 
-        //To add >95% logic here -> pop up?
+        if (matchPercentage >= 95) {
+            saveMatchedColor(mixedColor)
+            // Show a popup or perform some action indicating a successful match
+        }
     }
 
     private fun saveMatchedColor(color: String) {
@@ -226,8 +272,10 @@ class MainActivity : AppCompatActivity() {
     private fun navigateToPreviousColor() {
         if (targetColorIndex > 0) {
             targetColorIndex--
-            targetColor = targetColors[targetColorIndex]
+            val colorEntity = targetColors[targetColorIndex]
+            targetColor = colorEntity.hex
             targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+            targetColorView.text = "Target Color: ${colorEntity.name}"
             resetPaletteWeights()
         }
     }
@@ -235,8 +283,10 @@ class MainActivity : AppCompatActivity() {
     private fun navigateToNextColor() {
         if (targetColorIndex < targetColors.size - 1) {
             targetColorIndex++
-            targetColor = targetColors[targetColorIndex]
+            val colorEntity = targetColors[targetColorIndex]
+            targetColor = colorEntity.hex
             targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+            targetColorView.text = "Target Color: ${colorEntity.name}"
             resetPaletteWeights()
         }
     }
