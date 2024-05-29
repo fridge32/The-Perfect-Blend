@@ -15,6 +15,7 @@ import com.example.the_perfect_blend.ui.theme.ThePerfectBlendTheme
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 
+import android.util.Log
 import android.graphics.Color
 import android.widget.Button
 import android.widget.SeekBar
@@ -23,25 +24,32 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlin.random.Random
 import kotlin.math.exp
 import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.math.round
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 data class LabColor(val l: Double, val a: Double, val b: Double)
+data class ColorEntity(val hex: String, val name: String)
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var targetColorView: TextView
     private lateinit var mixedColorView: TextView
     private lateinit var percentageView: TextView
-    private lateinit var paletteButtons: Map<String, Pair<Button, Button>>
     private lateinit var resetButton: Button
     private lateinit var previousButton: Button
     private lateinit var nextButton: Button
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var allColors: List<ColorEntity>
+    private lateinit var paletteButtons: Map<String, Pair<Button, Button>>
 
+    private var targetColor: String = ""
+    private var targetColorName: String = ""
+    private var mixedColor: String = ""
     private var targetColors: MutableList<String> = mutableListOf()
     private var targetColorIndex: Int = 0
     private var savedColors: MutableList<String> = mutableListOf()
-    private var targetColor: String = ""
-    private var mixedColor: String = ""
     private var paletteWeights: MutableMap<String, Double> = mutableMapOf(
         "#FFFFFF" to 0.0,
         "#000000" to 0.0,
@@ -57,6 +65,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Initialize Firestore
+        firestore = FirebaseFirestore.getInstance()
+
         // Initialize UI elements
         targetColorView = findViewById(R.id.targetColorView)
         mixedColorView = findViewById(R.id.mixedColorView)
@@ -65,7 +76,6 @@ class MainActivity : AppCompatActivity() {
         previousButton = findViewById(R.id.previousButton)
         nextButton = findViewById(R.id.nextButton)
 
-        // Initialize color buttons
         paletteButtons = mapOf(
             "#FFFFFF" to Pair(findViewById(R.id.buttonWhiteIncrement), findViewById(R.id.buttonWhiteDecrement)),
             "#000000" to Pair(findViewById(R.id.buttonBlackIncrement), findViewById(R.id.buttonBlackDecrement)),
@@ -77,22 +87,38 @@ class MainActivity : AppCompatActivity() {
             "#FFFF00" to Pair(findViewById(R.id.buttonYellowIncrement), findViewById(R.id.buttonYellowDecrement))
         )
 
-        // Set button listeners
-        paletteButtons.forEach { (color, buttons) ->
-            buttons.first.setOnClickListener { changePaletteWeight(color, 0.1) }
-            buttons.second.setOnClickListener { changePaletteWeight(color, -0.1) }
+        // Fetch colors from Firestore and initialize target colors
+        fetchColorsFromFirestore {
+            repeat(20) { targetColors.add(generateRandomColor()) }
+            targetColor = targetColors[targetColorIndex]
+            updateTargetColorView()
         }
 
+        // Set button listeners
         resetButton.setOnClickListener { resetPaletteWeights() }
         previousButton.setOnClickListener { navigateToPreviousColor() }
         nextButton.setOnClickListener { navigateToNextColor() }
 
-        // Initialize target colors
-        repeat(10) { targetColors.add(generateRandomColor()) }
-        targetColor = targetColors[targetColorIndex]
-        targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+        paletteButtons.forEach { (color, buttons) ->
+            buttons.first.setOnClickListener { changePaletteWeight(color, 0.1) }
+            buttons.second.setOnClickListener { changePaletteWeight(color, -0.1) }
+        }
+    }
 
-        updateMixedColorAndPercentage()
+    private fun fetchColorsFromFirestore(onComplete: () -> Unit) {
+        firestore.collection("colors").get()
+            .addOnSuccessListener { documents ->
+                allColors = documents.map { document ->
+                    ColorEntity(
+                        hex = document.getString("hex") ?: "",
+                        name = document.getString("name") ?: ""
+                    )
+                }
+                onComplete()
+            }
+            .addOnFailureListener { exception ->
+                Log.w("FirestoreTest", "Error", exception )
+            }
     }
 
     private fun generateRandomColor(): String {
@@ -101,10 +127,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hexToRgb(hex: String): Triple<Int, Int, Int> {
+        if (hex.isEmpty()){
+            return Triple(0,0,0)
+        }
+
         val color = hex.removePrefix("#").toInt(16)
         val r = (color shr 16) and 0xFF
         val g = (color shr 8) and 0xFF
         val b = color and 0xFF
+        val x = Triple(r, g, b)
         return Triple(r, g, b)
     }
 
@@ -137,6 +168,64 @@ class MainActivity : AppCompatActivity() {
         )
 
         return rgbToHex(mixedColor.first.toInt(), mixedColor.second.toInt(), mixedColor.third.toInt())
+    }
+
+    private fun findClosestColor(color: String): ColorEntity {
+        val targetRgb = hexToRgb(color)
+        var closestColor = allColors[0]
+        var minDistance = Double.MAX_VALUE
+
+        for (colorEntity in allColors) {
+            val currentRgb = hexToRgb(colorEntity.hex)
+            val distance = calculateDistance(targetRgb, currentRgb)
+            if (distance < minDistance) {
+                minDistance = distance
+                closestColor = colorEntity
+            }
+        }
+        return closestColor
+    }
+
+    private fun calculateDistance(rgb1: Triple<Int, Int, Int>, rgb2: Triple<Int, Int, Int>): Double {
+        return sqrt((rgb1.first - rgb2.first).toDouble().pow(2) +
+                (rgb1.second - rgb2.second).toDouble().pow(2) +
+                (rgb1.third - rgb2.third).toDouble().pow(2))
+    }
+
+    private fun updateTargetColorView() {
+        lifecycleScope.launch {
+            val closestColor = findClosestColor(targetColor)
+            targetColorName = closestColor.name
+            targetColorView.text = targetColorName
+            targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+        }
+    }
+
+    private fun updateMixedColorAndPercentage() {
+        mixedColor = produceMixture(paletteWeights)
+        mixedColorView.setBackgroundColor(Color.parseColor(mixedColor))
+        val matchPercentage = calculatePercentage(targetColor, mixedColor)
+        percentageView.text = "Match Percentage: $matchPercentage%"
+
+        if (matchPercentage > 95) {
+            saveMatchedColor(targetColor)
+            // Show pop-up for "Color Matched"
+        }
+    }
+
+
+
+    private fun calculatePercentage(hex1: String, hex2: String): Double {
+        val rgb1 = hexToRgb(hex1)
+        val rgb2 = hexToRgb(hex2)
+        val xyz1 = rgbToXyz(rgb1.first, rgb1.second, rgb1.third)
+        val xyz2 = rgbToXyz(rgb2.first, rgb2.second, rgb2.third)
+
+        val labColor1 = xyzToLab(xyz1.first, xyz1.second, xyz1.third)
+        val labColor2 = xyzToLab(xyz2.first, xyz2.second, xyz2.third)
+
+        val difference = deltaE(labColor1, labColor2)
+        return round(100 * exp(-difference / 10) * 10) / 10.0
     }
 
     private fun rgbToXyz(r: Int, g: Int, b: Int): Triple<Double, Double, Double> {
@@ -176,33 +265,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun deltaE(lab1: LabColor, lab2: LabColor): Double {
-        return Math.sqrt(
-            Math.pow(lab1.l - lab2.l, 2.0) +
-                    Math.pow(lab1.a - lab2.a, 2.0) +
-                    Math.pow(lab1.b - lab2.b, 2.0)
+        return sqrt(
+            (lab1.l - lab2.l).pow(2.0) +
+                    (lab1.a - lab2.a).pow(2.0) +
+                    (lab1.b - lab2.b).pow(2.0)
         )
-    }
-
-    private fun calculatePercentage(hex1: String, hex2: String): Double {
-        val rgb1 = hexToRgb(hex1)
-        val rgb2 = hexToRgb(hex2)
-        val xyz1 = rgbToXyz(rgb1.first, rgb1.second, rgb1.third)
-        val xyz2 = rgbToXyz(rgb2.first, rgb2.second, rgb2.third)
-
-        val labColor1 = xyzToLab(xyz1.first, xyz1.second, xyz1.third)
-        val labColor2 = xyzToLab(xyz2.first, xyz2.second, xyz2.third)
-
-        val difference = deltaE(labColor1, labColor2)
-        return round(100 * exp(-difference / 10) * 10) / 10.0
-    }
-
-    private fun updateMixedColorAndPercentage() {
-        mixedColor = produceMixture(paletteWeights)
-        mixedColorView.setBackgroundColor(Color.parseColor(mixedColor))
-        val matchPercentage = calculatePercentage(targetColor, mixedColor)
-        percentageView.text = "Match Percentage: $matchPercentage%"
-
-        //To add >95% logic here -> pop up?
     }
 
     private fun saveMatchedColor(color: String) {
@@ -227,7 +294,7 @@ class MainActivity : AppCompatActivity() {
         if (targetColorIndex > 0) {
             targetColorIndex--
             targetColor = targetColors[targetColorIndex]
-            targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+            updateTargetColorView()
             resetPaletteWeights()
         }
     }
@@ -236,7 +303,7 @@ class MainActivity : AppCompatActivity() {
         if (targetColorIndex < targetColors.size - 1) {
             targetColorIndex++
             targetColor = targetColors[targetColorIndex]
-            targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+            updateTargetColorView()
             resetPaletteWeights()
         }
     }
