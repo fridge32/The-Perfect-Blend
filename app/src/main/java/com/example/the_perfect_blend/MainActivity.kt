@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var resetButton: Button
     private lateinit var previousButton: Button
     private lateinit var nextButton: Button
+    private lateinit var profileButton: Button
     private lateinit var firestore: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var allColors: List<ColorEntity>
@@ -82,6 +83,11 @@ class MainActivity : AppCompatActivity() {
         resetButton = findViewById(R.id.resetButton)
         previousButton = findViewById(R.id.previousButton)
         nextButton = findViewById(R.id.nextButton)
+        profileButton = findViewById(R.id.profileButton)
+
+        profileButton.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
 
         paletteButtons = mapOf(
             "#FFFFFF" to Pair(findViewById(R.id.buttonWhiteIncrement), findViewById(R.id.buttonWhiteDecrement)),
@@ -146,7 +152,6 @@ class MainActivity : AppCompatActivity() {
         val r = (color shr 16) and 0xFF
         val g = (color shr 8) and 0xFF
         val b = color and 0xFF
-        val x = Triple(r, g, b)
         return Triple(r, g, b)
     }
 
