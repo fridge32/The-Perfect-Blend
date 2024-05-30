@@ -29,8 +29,12 @@ import kotlin.math.round
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
+import com.example.the_perfect_blend.data.database.AppDatabase
+import com.example.the_perfect_blend.data.database.ColorEntity
+import androidx.room.Room
+
+
 data class LabColor(val l: Double, val a: Double, val b: Double)
-data class ColorEntity(val hex: String, val name: String)
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var allColors: List<ColorEntity>
     private lateinit var paletteButtons: Map<String, Pair<Button, Button>>
+    private lateinit var db: AppDatabase
 
     private var targetColor: String = ""
     private var targetColorName: String = ""
@@ -67,6 +72,12 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize Firestore
         firestore = FirebaseFirestore.getInstance()
+
+        // Initialize Room database
+        db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "color-database"
+        ).build()
 
         // Initialize UI elements
         targetColorView = findViewById(R.id.targetColorView)
@@ -108,13 +119,17 @@ class MainActivity : AppCompatActivity() {
     private fun fetchColorsFromFirestore(onComplete: () -> Unit) {
         firestore.collection("colors").get()
             .addOnSuccessListener { documents ->
-                allColors = documents.map { document ->
+                val colorList = documents.map { document ->
                     ColorEntity(
                         hex = document.getString("hex") ?: "",
                         name = document.getString("name") ?: ""
                     )
                 }
-                onComplete()
+                lifecycleScope.launch {
+                    db.colorDao().insertAll(colorList)
+                    allColors = db.colorDao().getAllColors()
+                    onComplete()
+                }
             }
             .addOnFailureListener { exception ->
                 Log.w("FirestoreTest", "Error", exception )
@@ -213,8 +228,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun calculatePercentage(hex1: String, hex2: String): Double {
         val rgb1 = hexToRgb(hex1)
         val rgb2 = hexToRgb(hex2)
@@ -308,3 +321,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
