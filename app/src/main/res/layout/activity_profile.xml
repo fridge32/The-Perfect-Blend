@@ -32,14 +32,24 @@
     </LinearLayout>
 
     <!-- User Stats -->
-    <TextView
-        android:id="@+id/userStats"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Total Colors Seen: 0\nTotal Solved: 0\n"
-        android:layout_marginBottom="16dp"/>
 
     <!-- Friends Section -->
+
+    <TextView
+        android:id="@+id/colorsSeenTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Total Colors Seen: 0" />
+
+    <TextView
+        android:id="@+id/colorsMatchedTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Total Colors Matched: 0" />
+
+
     <TextView
         android:id="@+id/friendsTitle"
         android:layout_width="match_parent"

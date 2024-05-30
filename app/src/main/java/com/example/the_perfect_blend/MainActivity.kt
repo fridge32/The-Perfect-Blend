@@ -4,6 +4,7 @@ import android.os.Bundle
 // Firebase imports
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import android.util.Log
 import android.graphics.Color
 import android.widget.Button
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton: Button
     private lateinit var profileButton: Button
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var database: FirebaseDatabase
     private lateinit var auth: FirebaseAuth
     private lateinit var allColors: List<ColorEntity>
     private lateinit var paletteButtons: Map<String, Pair<Button, Button>>
@@ -63,11 +65,13 @@ class MainActivity : AppCompatActivity() {
         // Initialize firebase stuff
         firestore = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance("https://the-perfect-blend-b4608-default-rtdb.asia-southeast1.firebasedatabase.app")
 
         // Is user currently signed in?
         val currentUser = auth.currentUser
         if (currentUser == null){
             startActivity(Intent(this, LoginActivity::class.java))
+            return
         }
 
         // Initialize Room database
@@ -214,6 +218,16 @@ class MainActivity : AppCompatActivity() {
             targetColorName = closestColor.name
             targetColorView.text = targetColorName
             targetColorView.setBackgroundColor(Color.parseColor(targetColor))
+            incrementColorSeen()
+        }
+    }
+
+    private fun incrementColorSeen(){
+        val currentUser = auth.currentUser ?:return
+        val userStatsRef = database.reference.child("user_stats").child(currentUser.uid)
+        userStatsRef.child("colors_seen").get().addOnSuccessListener { snapshot ->
+            val colorsSeen = snapshot.getValue(Int::class.java) ?:0
+            userStatsRef.child("colors_seen").setValue(colorsSeen + 1)
         }
     }
 
@@ -223,11 +237,23 @@ class MainActivity : AppCompatActivity() {
         val matchPercentage = calculatePercentage(targetColor, mixedColor)
         percentageView.text = "Match Percentage: $matchPercentage%"
 
-        if (matchPercentage > 95) {
+        if (matchPercentage > 85) {
             saveMatchedColor(targetColor)
+            incrementColorMatched()
             // Show pop-up for "Color Matched"
         }
     }
+
+    private fun incrementColorMatched() {
+        val currentUser = auth.currentUser ?: return
+        val userStatsRef = database.reference.child("user_stats").child(currentUser.uid)
+        userStatsRef.child("colors_matched").get().addOnSuccessListener { snapshot ->
+            val colorsMatched = snapshot.getValue(Int::class.java) ?: 0
+            userStatsRef.child("colors_matched").setValue(colorsMatched + 1)
+        }
+    }
+
+
 
     private fun calculatePercentage(hex1: String, hex2: String): Double {
         val rgb1 = hexToRgb(hex1)
