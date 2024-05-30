@@ -6,5 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "colors")
 data class ColorEntity(
     @PrimaryKey val hex: String,
-    val name: String
+    val name: String,
+    var seen: Int = 0,
+    var matched: Int = 0
 )

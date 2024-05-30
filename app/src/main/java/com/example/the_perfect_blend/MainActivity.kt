@@ -1,5 +1,6 @@
 package com.example.the_perfect_blend
 
+import com.example.the_perfect_blend.utils.Cache
 import android.os.Bundle
 // Firebase imports
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,6 +19,7 @@ import kotlin.math.round
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import android.content.Intent
+import android.widget.Toast
 import com.example.the_perfect_blend.data.database.AppDatabase
 import com.example.the_perfect_blend.data.database.ColorEntity
 import androidx.room.Room
@@ -78,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         db = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java, "color-database"
-        ).build()
+        ).addMigrations(AppDatabase.MIGRATION_1_2).build()
 
         // Initialize UI elements
         targetColorView = findViewById(R.id.targetColorView)
@@ -128,8 +130,10 @@ class MainActivity : AppCompatActivity() {
                 val colorList = documents.map { document ->
                     ColorEntity(
                         hex = document.getString("hex") ?: "",
-                        name = document.getString("name") ?: ""
-                    )
+                        name = document.getString("name") ?: "",
+                        seen = 0,
+                        matched = 0
+                    ).also { Cache.putColor(it)}
                 }
                 lifecycleScope.launch {
                     db.colorDao().insertAll(colorList)
@@ -218,16 +222,20 @@ class MainActivity : AppCompatActivity() {
             targetColorName = closestColor.name
             targetColorView.text = targetColorName
             targetColorView.setBackgroundColor(Color.parseColor(targetColor))
-            incrementColorSeen()
+            incrementColorSeen(closestColor)
         }
     }
 
-    private fun incrementColorSeen(){
-        val currentUser = auth.currentUser ?:return
-        val userStatsRef = database.reference.child("user_stats").child(currentUser.uid)
-        userStatsRef.child("colors_seen").get().addOnSuccessListener { snapshot ->
-            val colorsSeen = snapshot.getValue(Int::class.java) ?:0
-            userStatsRef.child("colors_seen").setValue(colorsSeen + 1)
+    private suspend fun incrementColorSeen(colorEntity: ColorEntity) {
+        if (colorEntity.seen == 0) {
+            colorEntity.seen += 1
+            db.colorDao().insert(colorEntity)
+            val currentUser = auth.currentUser ?: return
+            val userStatsRef = database.reference.child("user_stats").child(currentUser.uid)
+            userStatsRef.child("colors_seen").get().addOnSuccessListener { snapshot ->
+                val colorsSeen = snapshot.getValue(Int::class.java) ?: 0
+                userStatsRef.child("colors_seen").setValue(colorsSeen + 1)
+            }
         }
     }
 
@@ -240,7 +248,7 @@ class MainActivity : AppCompatActivity() {
         if (matchPercentage > 85) {
             saveMatchedColor(targetColor)
             incrementColorMatched()
-            // Show pop-up for "Color Matched"
+            Toast.makeText(this, "Color Matched!", Toast.LENGTH_SHORT).show()
         }
     }
 
