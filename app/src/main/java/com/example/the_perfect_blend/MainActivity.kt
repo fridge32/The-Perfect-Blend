@@ -1,24 +1,12 @@
 package com.example.the_perfect_blend
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.the_perfect_blend.ui.theme.ThePerfectBlendTheme
 // Firebase imports
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
-
+import com.google.firebase.auth.FirebaseAuth
 import android.util.Log
 import android.graphics.Color
 import android.widget.Button
-import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlin.random.Random
@@ -28,7 +16,7 @@ import kotlin.math.sqrt
 import kotlin.math.round
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-
+import android.content.Intent
 import com.example.the_perfect_blend.data.database.AppDatabase
 import com.example.the_perfect_blend.data.database.ColorEntity
 import androidx.room.Room
@@ -45,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var previousButton: Button
     private lateinit var nextButton: Button
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
     private lateinit var allColors: List<ColorEntity>
     private lateinit var paletteButtons: Map<String, Pair<Button, Button>>
     private lateinit var db: AppDatabase
@@ -70,8 +59,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize Firestore
+        // Initialize firebase stuff
         firestore = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
+
+        // Is user currently signed in?
+        val currentUser = auth.currentUser
+        if (currentUser == null){
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
 
         // Initialize Room database
         db = Room.databaseBuilder(
