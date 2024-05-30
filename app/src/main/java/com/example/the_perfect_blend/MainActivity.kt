@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize firebase stuff
+        // Initialize firebase
         firestore = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance("https://the-perfect-blend-b4608-default-rtdb.asia-southeast1.firebasedatabase.app")
@@ -112,6 +112,7 @@ class MainActivity : AppCompatActivity() {
             targetColor = targetColors[targetColorIndex]
             updateTargetColorView()
         }
+
 
         // Set button listeners
         resetButton.setOnClickListener { resetPaletteWeights() }
@@ -235,6 +236,7 @@ class MainActivity : AppCompatActivity() {
             userStatsRef.child("colors_seen").get().addOnSuccessListener { snapshot ->
                 val colorsSeen = snapshot.getValue(Int::class.java) ?: 0
                 userStatsRef.child("colors_seen").setValue(colorsSeen + 1)
+                userStatsRef.child("email").setValue(currentUser.email)
             }
         }
     }
@@ -258,8 +260,11 @@ class MainActivity : AppCompatActivity() {
         userStatsRef.child("colors_matched").get().addOnSuccessListener { snapshot ->
             val colorsMatched = snapshot.getValue(Int::class.java) ?: 0
             userStatsRef.child("colors_matched").setValue(colorsMatched + 1)
+            userStatsRef.child("email").setValue(currentUser.email)
         }
     }
+
+
 
 
 

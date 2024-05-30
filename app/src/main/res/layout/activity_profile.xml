@@ -32,9 +32,6 @@
     </LinearLayout>
 
     <!-- User Stats -->
-
-    <!-- Friends Section -->
-
     <TextView
         android:id="@+id/colorsSeenTextView"
         android:layout_width="match_parent"
@@ -46,37 +43,8 @@
         android:id="@+id/colorsMatchedTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="36dp"
         android:text="Total Colors Matched: 0" />
-
-
-    <TextView
-        android:id="@+id/friendsTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Friends"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_marginBottom="8dp"/>
-
-    <!-- Friend Search -->
-    <EditText
-        android:id="@+id/searchFriendEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Search Friend"
-        android:layout_marginBottom="8dp"/>
-
-    <!-- Add Friend Button -->
-    <Button
-        android:id="@+id/addFriendButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add Friend"
-        android:layout_marginBottom="16dp"/>
-
-    <!-- Chat Feature -->
-    <!-- You can add your chat feature UI here -->
 
     <!-- Leaderboard Section -->
     <TextView
@@ -89,6 +57,8 @@
         android:layout_marginBottom="8dp"/>
 
     <!-- Global Leaderboard -->
-    <!-- You can display the global leaderboard here -->
-
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/leaderboardRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>

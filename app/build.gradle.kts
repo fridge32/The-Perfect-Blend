@@ -69,6 +69,8 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+
 
     //room
     implementation("androidx.room:room-runtime:2.6.1")
